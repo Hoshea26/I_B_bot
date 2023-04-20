@@ -109,12 +109,11 @@ class MarketDataApp(EWrapper, EClient):
                 append_stl(datetime.now().strftime("%H:%M:%S"), put_bid_df["price"].max(), "put")
 
     def historicalData(self, reqId, bar):
-        def historicalData(self, reqId, bar):
-            global put_bid_hist_df
-            if reqId == 1:
-                # new_row = {"time": bar.date, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close}
-                # put_bid_hist_df = put_bid_hist_df.append(new_row, ignore_index=True)
-                print(bar.date, bar.open, bar.high, bar.low, bar.close)
+        global put_bid_hist_df
+        if reqId == 1:
+            # new_row = {"time": bar.date, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close}
+            # put_bid_hist_df = put_bid_hist_df.append(new_row, ignore_index=True)
+            print(bar.date, bar.open, bar.high, bar.low, bar.close)
     def error(self, reqId, errorCode, errorString):
         print(errorCode)
         print(errorString)
@@ -179,7 +178,7 @@ def main():
     app.reqHistoricalData(reqId=1,
                           contract=put_contract,
                           endDateTime="",
-                          durationStr="1 D",
+                          durationStr="10800 s",
                           barSizeSetting="5 secs",
                           whatToShow="BID",
                           useRTH=0,
@@ -284,18 +283,7 @@ def update_put_bid_graph(n):
 
 def update_put_bid_iqr_filtered_graph(n):
 
-    global put_bid_hist_iqr_filtered_df
-    put_bid_hist_iqr_filtered_df = remove_outliers_iqr(put_bid_hist_df["close"])
-
     iqr_filtered_data = remove_outliers_iqr(put_bid_df["price"])
-
-    trace_hist_iqr_candle = go.Candlestick(x=list(put_bid_hist_df.time),
-                                           open=list(put_bid_hist_df.open),
-                                           high=list(put_bid_hist_df.high),
-                                           low=list(put_bid_hist_df.low),
-                                           close=list(put_bid_hist_iqr_filtered_df),
-                                           name="Historical Put Bids - IQR Filtered"
-                                           )
 
     trace_chart = go.Scatter(x=list(put_bid_df.time),
                              y=list(iqr_filtered_data),
@@ -303,7 +291,7 @@ def update_put_bid_iqr_filtered_graph(n):
                              name="Put Bids - IQR Filtered",
                              marker=dict(color="#42f4b0")
                              )
-    data = [trace_hist_iqr_candle, trace_chart]
+    data = [trace_chart]
     layout = dict(title="Put Bids - IQR Filtered Chart", showlegend=False)
     fig = dict(data=data, layout=layout)
     return fig
